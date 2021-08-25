@@ -19,7 +19,7 @@ This section shows how the Liqo namespace model works under the hood, understand
 
 Liqo namespace replication involves instances of two kinds of CRDs:
 
-* First, the initial trigger is represented by the manipulation of a **NamespaceOffloading** (or the labelling of a namespace as explained in [the usage section](/usage/namespace_offloading)).
+* **NamespaceOffloading**: this CR represents the initial trigger of the namespace replication process; alternatively, the labelling of a namespace as explained in the [Namespace Extension](/usage/namespace_offloading)) section can also be used.
   On the one hand, the *NamespaceOffloading* spec describes the properties of the replication, such as the name of the replicated namespaces.
   On the other hand, the `status` collects the information about the actual status of remote namespaces, e.g., if the replication succeeded or not.
 * **NamespaceMap**: this CR contains the list of namespaces associated to a specific node.
@@ -37,7 +37,7 @@ The namespace replication logic is made by several controllers, responsible for 
 
 #### Workflow
 
-In the next figure, you can observe a representation of the overall workflow steps of the replication process:
+The figure below presents a representation of the overall workflow steps of the replication process:
 
 ![](/images/namespace-replication/replication.png)
 
