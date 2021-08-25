@@ -5,16 +5,15 @@ weight: 2
 
 ### The Liqo Namespace Model
 
-The Liqo resource replication model is composed of several concurring logics responsible for different kind of objects to replicate.
+The Liqo resource replication model is made by a set of components that replicate each object with a logic that is object-specific.
 One important example is represented by namespaces. 
 In particular, namespace replication across multiple clusters implements a key mechanism to extend seamleassly a cluster to some others.
 
-In the Liqo model, the namespace replication corresponds to a standard v1.Namespace and an associated [NamespaceOffloading](#) CR.
-The NamespaceOffloading resource allows to select the clusters which are the clusters where the application contained inside the namespace can be scheduled.
+In the Liqo model, the namespace replication operates on a a standard `v1.Namespace`, associated to a Liqo-specific [NamespaceOffloading](#) CR; this new CR enables to specify the (remote) clusters on which the application can be scheduled.
 
-In [a dedicated usage section](/usage/namespace_offloading), you can learn how to define and use a NamespaceOffloading resource activating the replication of the local namespace on peered clusters.
+Section [Namespace Extensions](/usage/namespace_offloading) shows how to define and use a `NamespaceOffloading` resource that enables the replication of the local namespace on peered (remote) clusters.
 
-In this section, you may discover how Liqo namespace model works under the hood, undestanding which resources and controllers are activated when a new namespaceOffloading is manipulated.
+This section shows how the Liqo namespace model works under the hood, understanding which resources and controllers are activated when a new `namespaceOffloading` is manipulated.
 
 #### Resources
 
@@ -22,19 +21,19 @@ Liqo namespace replication involves instances of two kinds of CRDs:
 
 * First, the initial trigger is represented by the manipulation of a **NamespaceOffloading** (or the labelling of a namespace as explained in [the usage section](/usage/namespace_offloading)).
   On the one hand, the *NamespaceOffloading* spec describes the properties of the replication, such as the name of the replicated namespaces.
-  On the other hand, the status collects the information about the actual status of remote namespaces (i.e. if the replication has succeeded).
-* Second, **NamespaceMap** resources contain the list of namespaces associated to a specific node.
-  The spec collects the list of desired namespaces for a specific remote cluster while the status updated information about their effective creation.
+  On the other hand, the `status` collects the information about the actual status of remote namespaces, e.g., if the replication succeeded or not.
+* **NamespaceMap**: this CR contains the list of namespaces associated to a specific node.
+  The `spec` collects the list of desired namespaces for a specific remote cluster while the `status` keeps the updated information about their actual creation.
   Each *NamespaceMap* can be alimented by several *NamespaceOffloading* instances that are targeting the same cluster for a remote namespace.
   It is worth noting that the NamespaceMap status represent the source of truth to know the status of replicated namesapces on foreign clusters.
 
 #### Controllers
 
-The namespace replication logic is composed of several distinct controllers, responsible for different aspects of namespace controllers:
+The namespace replication logic is made by several controllers, responsible for different aspects of namespace controllers:
 
-* **NamespaceOffloading Controller**: processes the NamespaceOffloading spec and outputs namespace entries to NamespaceMap specs.
-* **NamespaceMap Controller**: enforces the namespace creation of the remote namespaces on remote clusters and updates the status of the NamespaceMaps.
-* **OffloadingStatus Controller**: updates the status of the NamespaceOffloading resources by reading the NamespaceMaps statuses.
+* **NamespaceOffloading Controller**: it processes the NamespaceOffloading spec and creates the proper namespace entries into NamespaceMap specs.
+* **NamespaceMap Controller**: it takes care of creating the required namespaces on remote clusters and updates their corresponding status in the NamespaceMaps.
+* **OffloadingStatus Controller**: it updates the status of the NamespaceOffloading resources by reading the NamespaceMaps statuses.
 
 #### Workflow
 
@@ -48,7 +47,6 @@ We can resume the steps in:
 
 2. After having detected the virtual-nodes compliant with selector, a namespace creation request is entered in every NamespaceMap associated with a selected cluster **(Step 2 in the figure)**.
 In particular, it considers the **ClusterSelector** field to select on which cluster the current namespace should be replicated.
-
 More precisely, the controller responsible for this reconciliation is the **NamespaceOffloading Controller**. 
 It processes the *NamespaceOffloading* spec fields, by inserting the namespace creation requests in the *spec.DesiredMapping* field of **NamespaceMap** instances of selected clusters.
 The request format is an entry consisting of the local namespace name as a key and the name of the remote namespace as a value.
